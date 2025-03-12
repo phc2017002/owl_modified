@@ -17,6 +17,7 @@ from camel.models import ModelFactory
 from camel.toolkits import (
     SearchToolkit,
     WebToolkit,
+    FileWriteToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
 from camel.logger import set_log_level
@@ -71,6 +72,7 @@ def construct_society(question: str) -> OwlRolePlaying:
         ).get_tools(),
         SearchToolkit().search_duckduckgo,
         SearchToolkit().search_wiki,
+        *FileWriteToolkit(output_dir="./").get_tools(),
     ]
 
     # Configure agent roles and parameters

@@ -19,7 +19,7 @@
 from dotenv import load_dotenv
 
 from camel.models import ModelFactory
-from camel.toolkits import WebToolkit, SearchToolkit
+from camel.toolkits import WebToolkit, SearchToolkit, FileWriteToolkit
 from camel.types import ModelPlatformType, ModelType
 
 from utils import OwlRolePlaying, run_society
@@ -69,6 +69,7 @@ def construct_society(question: str) -> OwlRolePlaying:
             output_language="Chinese",
         ).get_tools(),
         SearchToolkit().search_duckduckgo,
+        *FileWriteToolkit(output_dir="./").get_tools(),
     ]
 
     user_role_name = "user"

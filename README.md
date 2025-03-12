@@ -71,25 +71,47 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
   - [**Install Dependencies**](#install-dependencies)
   - [**Setup Environment Variables**](#setup-environment-variables)
   - [**Running with Docker**](#running-with-docker)
-  
 - [🚀 Quick Start](#-quick-start)
+- [🧰 Toolkits and Capabilities](#-toolkits-and-capabilities)
 - [🌐 Web Interface](#-web-interface)
 - [🧪 Experiments](#-experiments)
 - [⏱️ Future Plans](#️-future-plans)
 - [📄 License](#-license)
 - [🖊️ Cite](#️-cite)
+- [🤝 Contributing](#-contributing)
 - [🔥 Community](#-community)
 - [❓ FAQ](#-faq)
+- [📚 Exploring CAMEL Dependency](#-exploring-camel-dependency)
 - [⭐ Star History](#-star-history)
 
 
 # 🔥 News
 
-- **[2025.03.07]**: We open-source the codebase of 🦉 OWL project.
+<div align="center" style="background-color: #fffacd; padding: 15px; border-radius: 10px; border: 2px solid #ffd700; margin: 20px 0;">
+  <h3 style="color: #d81b60; margin: 0; font-size: 1.3em;">
+    🌟🌟🌟 <b>COMMUNITY CALL FOR USE CASES!</b> 🌟🌟🌟
+  </h3>
+  <p style="font-size: 1.1em; margin: 10px 0;">
+    We're inviting the community to contribute innovative use cases for OWL! <br>
+    The <b>top ten submissions</b> will receive special community gifts and recognition.
+  </p>
+  <p>
+    <a href="https://github.com/camel-ai/owl/tree/main/community_usecase/COMMUNITY_CALL_FOR_USE_CASES.md" style="background-color: #d81b60; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;">Learn More & Submit</a>
+  </p>
+  <p style="margin: 5px 0;">
+    Submission deadline: <b>March 31, 2025</b>
+  </p>
+</div>
+
+- **[2025.03.12]**: Launched our Community Call for Use Cases initiative! See the highlighted announcement above.
+- **[2025.03.11]**: We added MCPToolkit, FileWriteToolkit, and TerminalToolkit to enhance OWL agents with MCP tool calling, file writing capabilities, and terminal command execution.
+- **[2025.03.09]**: We added a web-based user interface that makes it easier to interact with the system.
+- **[2025.03.07]**: We open-sourced the codebase of the 🦉 OWL project.
+- **[2025.03.03]**: OWL achieved the #1 position among open-source frameworks on the GAIA benchmark with a score of 58.18.
 
 # 🎬 Demo Video
 
-https://private-user-images.githubusercontent.com/55657767/420211368-f29f477d-7eef-46da-8d7a-8f3bcf506da2.mp4
+https://github.com/user-attachments/assets/2a2a825d-39ea-45c5-9ba1-f9d58efbc372
 
 https://private-user-images.githubusercontent.com/55657767/420212194-e813fc05-136a-485f-8df3-f10d9b4e63ec.mp4
 
@@ -103,6 +125,8 @@ https://private-user-images.githubusercontent.com/55657767/420212194-e813fc05-13
 - **Built-in Toolkits**: Access to a comprehensive set of built-in toolkits including ArxivToolkit, AudioAnalysisToolkit, CodeExecutionToolkit, DalleToolkit, DataCommonsToolkit, ExcelToolkit, GitHubToolkit, GoogleMapsToolkit, GoogleScholarToolkit, ImageAnalysisToolkit, MathToolkit, NetworkXToolkit, NotionToolkit, OpenAPIToolkit, RedditToolkit, SearchToolkit, SemanticScholarToolkit, SymPyToolkit, VideoAnalysisToolkit, WeatherToolkit, WebToolkit, and many more for specialized tasks.
 
 # 🛠️ Installation
+
+OWL supports multiple installation methods to fit your workflow preferences. Choose the option that works best for you.
 
 ## Option 1: Using uv (Recommended)
 
@@ -181,19 +205,45 @@ pip install -r requirements.txt
 conda deactivate
 ```
 
-## **Setup Environment Variables** 
+## **Setup Environment Variables**
 
-In the `owl/.env_template` file, you will find all the necessary API keys along with the websites where you can register for each service. To use these API services, follow these steps:
+OWL requires various API keys to interact with different services. The `owl/.env_template` file contains placeholders for all necessary API keys along with links to the services where you can register for them.
 
-1. *Copy and Rename*: Duplicate the `.env_template` file and rename the copy to `.env`.
-```bash
-cp owl/.env_template .env
-```
-2. *Fill in Your Keys*: Open the `.env` file and insert your API keys in the corresponding fields.  (For the minimal example (`run_mini.py`), you only need to configure the LLM API key (e.g., OPENAI_API_KEY).)
-3. *For using more other models*: please refer to our CAMEL models docs:https://docs.camel-ai.org/key_modules/models.html#supported-model-platforms-in-camel
+### Option 1: Using a `.env` File (Recommended)
+
+1. **Copy and Rename the Template**:
+   ```bash
+   cd owl
+   cp .env_template .env
+   ```
+
+2. **Configure Your API Keys**:
+   Open the `.env` file in your preferred text editor and insert your API keys in the corresponding fields.
+   
+   > **Note**: For the minimal example (`run_mini.py`), you only need to configure the LLM API key (e.g., `OPENAI_API_KEY`).
+
+### Option 2: Setting Environment Variables Directly
+
+Alternatively, you can set environment variables directly in your terminal:
+
+- **macOS/Linux (Bash/Zsh)**:
+  ```bash
+  export OPENAI_API_KEY="your-openai-api-key-here"
+  ```
+
+- **Windows (Command Prompt)**:
+  ```batch
+  set OPENAI_API_KEY="your-openai-api-key-here"
+  ```
+
+- **Windows (PowerShell)**:
+  ```powershell
+  $env:OPENAI_API_KEY = "your-openai-api-key-here"
+  ```
+
+> **Note**: Environment variables set directly in the terminal will only persist for the current session.
 
 
-> **Note**: For optimal performance, we strongly recommend using OpenAI models. Our experiments show that other models may result in significantly lower performance on complex tasks and benchmarks.
 
 ## **Running with Docker**
 
@@ -225,9 +275,7 @@ For more detailed Docker usage instructions, including cross-platform support, o
 
 # 🚀 Quick Start
 
-
-   
-Run the following demo case:
+After installation and setting up your environment variables, you can start using OWL right away:
 
 ```bash
 python owl/run.py
@@ -235,17 +283,32 @@ python owl/run.py
 
 ## Running with Different Models
 
-OWL supports various LLM backends. You can use the following scripts to run with different models:
+### Model Requirements
+
+- **Tool Calling**: OWL requires models with robust tool calling capabilities to interact with various toolkits. Models must be able to understand tool descriptions, generate appropriate tool calls, and process tool outputs.
+
+- **Multimodal Understanding**: For tasks involving web interaction, image analysis, or video processing, models with multimodal capabilities are required to interpret visual content and context.
+
+#### Supported Models
+
+For information on configuring AI models, please refer to our [CAMEL models documentation](https://docs.camel-ai.org/key_modules/models.html#supported-model-platforms-in-camel).
+
+> **Note**: For optimal performance, we strongly recommend using OpenAI models (GPT-4 or later versions). Our experiments show that other models may result in significantly lower performance on complex tasks and benchmarks, especially those requiring advanced multi-modal understanding and tool use.
+
+OWL supports various LLM backends, though capabilities may vary depending on the model's tool calling and multimodal abilities. You can use the following scripts to run with different models:
 
 ```bash
 # Run with Qwen model
-python owl/run_qwen.py
+python owl/run_qwen_zh.py
 
 # Run with Deepseek model
-python owl/run_deepseek.py
+python owl/run_deepseek_zh.py
 
 # Run with other OpenAI-compatible models
 python owl/run_openai_compatiable_model.py
+
+# Run with Ollama
+python owl/run_ollama.py
 ```
 
 For a simpler version that only requires an LLM API key, you can try our minimal example:
@@ -280,21 +343,92 @@ print(f"\033[94mAnswer: {answer}\033[0m")
 OWL will then automatically invoke document-related tools to process the file and extract the answer.
 
 
-Example tasks you can try:
+### Example Tasks
+
+Here are some tasks you can try with OWL:
+
 - "Find the latest stock price for Apple Inc."
 - "Analyze the sentiment of recent tweets about climate change"
 - "Help me debug this Python code: [your code here]"
 - "Summarize the main points from this research paper: [paper URL]"
+- "Create a data visualization for this dataset: [dataset path]"
+
+# 🧰 Toolkits and Capabilities
+
+> **Important**: Effective use of toolkits requires models with strong tool calling capabilities. For multimodal toolkits (Web, Image, Video), models must also have multimodal understanding abilities.
+
+OWL supports various toolkits that can be customized by modifying the `tools` list in your script:
+
+```python
+# Configure toolkits
+tools = [
+    *WebToolkit(headless=False).get_tools(),  # Browser automation
+    *VideoAnalysisToolkit(model=models["video"]).get_tools(),
+    *AudioAnalysisToolkit().get_tools(),  # Requires OpenAI Key
+    *CodeExecutionToolkit(sandbox="subprocess").get_tools(),
+    *ImageAnalysisToolkit(model=models["image"]).get_tools(),
+    SearchToolkit().search_duckduckgo,
+    SearchToolkit().search_google,  # Comment out if unavailable
+    SearchToolkit().search_wiki,
+    *ExcelToolkit().get_tools(),
+    *DocumentProcessingToolkit(model=models["document"]).get_tools(),
+    *FileWriteToolkit(output_dir="./").get_tools(),
+]
+```
+
+## Available Toolkits
+
+Key toolkits include:
+
+### Multimodal Toolkits (Require multimodal model capabilities)
+- **WebToolkit**: Browser automation for web interaction and navigation
+- **VideoAnalysisToolkit**: Video processing and content analysis
+- **ImageAnalysisToolkit**: Image analysis and interpretation
+
+### Text-Based Toolkits
+- **AudioAnalysisToolkit**: Audio processing (requires OpenAI API)
+- **CodeExecutionToolkit**: Python code execution and evaluation
+- **SearchToolkit**: Web searches (Google, DuckDuckGo, Wikipedia)
+- **DocumentProcessingToolkit**: Document parsing (PDF, DOCX, etc.)
+
+Additional specialized toolkits: ArxivToolkit, GitHubToolkit, GoogleMapsToolkit, MathToolkit, NetworkXToolkit, NotionToolkit, RedditToolkit, WeatherToolkit, and more. For a complete list, see the [CAMEL toolkits documentation](https://docs.camel-ai.org/key_modules/tools.html#built-in-toolkits).
+
+## Customizing Your Configuration
+
+To customize available tools:
+
+```python
+# 1. Import toolkits
+from camel.toolkits import WebToolkit, SearchToolkit, CodeExecutionToolkit
+
+# 2. Configure tools list
+tools = [
+    *WebToolkit(headless=True).get_tools(),
+    SearchToolkit().search_wiki,
+    *CodeExecutionToolkit(sandbox="subprocess").get_tools(),
+]
+
+# 3. Pass to assistant agent
+assistant_agent_kwargs = {"model": models["assistant"], "tools": tools}
+```
+
+Selecting only necessary toolkits optimizes performance and reduces resource usage.
 
 # 🌐 Web Interface
 
-OWL now includes a web-based user interface that makes it easier to interact with the system. To start the web interface, run:
+OWL includes an intuitive web-based user interface that makes it easier to interact with the system. 
+
+## Starting the Web UI
 
 ```bash
-python run_app.py
+# Start the Chinese version
+python run_app_zh.py
+
+# Start the English version
+python run_app_en.py
 ```
 
-The web interface provides the following features:
+## Features
 
 - **Easy Model Selection**: Choose between different models (OpenAI, Qwen, DeepSeek, etc.)
 - **Environment Variable Management**: Configure your API keys and other settings directly from the UI
@@ -308,21 +442,25 @@ The web interface is built using Gradio and runs locally on your machine. No dat
 To reproduce OWL's GAIA benchmark score of 58.18:
 
 1. Switch to the `gaia58.18` branch:
-```bash
-git checkout gaia58.18
-```
+   ```bash
+   git checkout gaia58.18
+   ```
 
-1. Run the evaluation script:
-```bash
-python run_gaia_roleplaying.py
-```
+2. Run the evaluation script:
+   ```bash
+   python run_gaia_roleplaying.py
+   ```
+
+This will execute the same configuration that achieved our top-ranking performance on the GAIA benchmark.
 
 # ⏱️ Future Plans
 
-- [ ] Write a technical blog post detailing our exploration and insights in multi-agent collaboration in real-world tasks.
-- [ ] Enhance the toolkit ecosystem with more specialized tools for domain-specific tasks.
-- [ ] Develop more sophisticated agent interaction patterns and communication protocols
+We're continuously working to improve OWL. Here's what's on our roadmap:
 
+- [ ] Write a technical blog post detailing our exploration and insights in multi-agent collaboration in real-world tasks
+- [ ] Enhance the toolkit ecosystem with more specialized tools for domain-specific tasks
+- [ ] Develop more sophisticated agent interaction patterns and communication protocols
+- [ ] Improve performance on complex multi-step reasoning tasks
 
 # 📄 License
 
@@ -343,10 +481,27 @@ If you find this repo useful, please cite:
 }
 ```
 
+# 🤝 Contributing
+
+We welcome contributions from the community! Here's how you can help:
+
+1. Read our [Contribution Guidelines](https://github.com/camel-ai/camel/blob/master/CONTRIBUTING.md)
+2. Check [open issues](https://github.com/camel-ai/camel/issues) or create new ones
+3. Submit pull requests with your improvements
+
+**Current Issues Open for Contribution:**
+- [#1812](https://github.com/camel-ai/camel/issues/1812)
+- [#1802](https://github.com/camel-ai/camel/issues/1802)
+- [#1798](https://github.com/camel-ai/camel/issues/1798)
+- [#1770](https://github.com/camel-ai/camel/issues/1770)
+
+To take on an issue, simply leave a comment stating your interest.
+
 # 🔥 Community
+Join us ([*Discord*](https://discord.camel-ai.org/) or [*WeChat*](https://ghli.org/camel/wechat.png)) in pushing the boundaries of finding the scaling laws of agents. 
+
 Join us for further discussions!
-<!-- ![](./assets/community.png) -->
-![](./assets/community_7.jpg)
+![](./assets/community.jpg)
 <!-- ![](./assets/meetup.jpg) -->
 
 # ❓ FAQ
@@ -354,6 +509,26 @@ Join us for further discussions!
 **Q: Why don't I see Chrome running locally after starting the example script?**
 
 A: If OWL determines that a task can be completed using non-browser tools (such as search or code execution), the browser will not be launched. The browser window will only appear when OWL determines that browser-based interaction is necessary.
+
+**Q: Which Python version should I use?**
+
+A: OWL supports Python 3.10, 3.11, and 3.12. 
+
+**Q: How can I contribute to the project?**
+
+A: See our [Contributing](#-contributing) section for details on how to get involved. We welcome contributions of all kinds, from code improvements to documentation updates.
+
+# 📚 Exploring CAMEL Dependency
+
+OWL is built on top of the [CAMEL](https://github.com/camel-ai/camel) Framework, here's how you can explore the CAMEL source code and understand how it works with OWL:
+
+## Accessing CAMEL Source Code
+
+```bash
+# Clone the CAMEL repository
+git clone https://github.com/camel-ai/camel.git
+cd camel
+```
 
 # ⭐ Star History
 

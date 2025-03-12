@@ -27,6 +27,7 @@ from camel.toolkits import (
     SearchToolkit,
     VideoAnalysisToolkit,
     WebToolkit,
+    FileWriteToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
 from camel.configs import ChatGPTConfig
@@ -101,6 +102,7 @@ def main():
         *ImageAnalysisToolkit(model=models["image"]).get_tools(),
         *SearchToolkit().get_tools(),
         *ExcelToolkit().get_tools(),
+        *FileWriteToolkit(output_dir="./").get_tools(),
     ]
 
     # Configure agent roles and parameters

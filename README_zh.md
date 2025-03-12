@@ -1,6 +1,6 @@
 <h1 align="center">
 	🦉 OWL: Optimized Workforce Learning for General Multi-Agent Assistance in Real-World Task Automation
-  🦉 OWL: 优化劳动力学习的通用智能体，用于处理现实世界的自动化任务
+	🦉 OWL: 优化劳动力学习的通用智能体，用于处理现实世界的自动化任务
 </h1>
 
 
@@ -73,18 +73,42 @@
   - [**设置环境变量**](#设置环境变量)
   - [**使用Docker运行**](#使用docker运行)
 - [🚀 快速开始](#-快速开始)
+- [🧰 工具包与功能](#-工具包与功能)
 - [🌐 网页界面](#-网页界面)
 - [🧪 实验](#-实验)
 - [⏱️ 未来计划](#️-未来计划)
 - [📄 许可证](#-许可证)
 - [🖊️ 引用](#️-引用)
+- [🤝 贡献](#-贡献)
 - [🔥 社区](#-社区)
 - [❓ 常见问题](#-常见问题)
+- [📚 探索 CAMEL 依赖](#-探索-camel-依赖)
+- [⭐ Star History](#-star-history)
 
 
 # 🔥 新闻
 
+<div align="center" style="background-color: #fffacd; padding: 15px; border-radius: 10px; border: 2px solid #ffd700; margin: 20px 0;">
+  <h3 style="color: #d81b60; margin: 0; font-size: 1.3em;">
+    🌟🌟🌟 <b>OWL社区用例征集令！</b> 🌟🌟🌟
+  </h3>
+  <p style="font-size: 1.1em; margin: 10px 0;">
+    我们请社区成员贡献创新的OWL用例！<br>
+    <b>前十名提交</b>将获得特别社区礼物和认可。
+  </p>
+  <p>
+    <a href="https://github.com/camel-ai/owl/tree/main/community_usecase/COMMUNITY_CALL_FOR_USE_CASES.md" style="background-color: #d81b60; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;">了解更多并提交</a>
+  </p>
+  <p style="margin: 5px 0;">
+    提交截止日期：<b>2025年3月31日</b>
+  </p>
+</div>
+
+- **[2025.03.12]**: 启动了我们的社区用例征集计划！请查看上方的高亮公告。
+- **[2025.03.11]**: 我们添加了 MCPToolkit、FileWriteToolkit 和 TerminalToolkit，增强 OWL Agent的工具调用、文件写入能力和终端命令执行功能。
+- **[2025.03.09]**: 我们添加了基于网页的用户界面，使系统交互变得更加简便。
 - **[2025.03.07]**: 我们开源了 🦉 OWL 项目的代码库。
+- **[2025.03.03]**: OWL 在 GAIA 基准测试中取得 58.18 平均分，在开源框架中排名第一！
 
 # 🎬 演示视频
 
@@ -180,15 +204,43 @@ pip install -r requirements.txt
 conda deactivate
 ```
 
-## **设置环境变量**  
+## **设置环境变量**
 
-在 `owl/.env_template` 文件中，你可以找到所有必要的 API 密钥以及各服务的注册网址。要使用这些 API 服务，请按照以下步骤操作：
+OWL 需要各种 API 密钥来与不同的服务进行交互。`owl/.env_template` 文件包含了所有必要 API 密钥的占位符，以及可以注册这些服务的链接。
 
-1. *复制并重命名*: 复制 `.env_template` 文件，并将副本重命名为 `.env`。
-2. *填写你的密钥*: 打开 `.env` 文件，在相应字段中填入你的 API 密钥。 
-3. *如需使用更多其他模型*：请参考我们CAMEL的models文档：https://docs.camel-ai.org/key_modules/models.html#supported-model-platforms-in-camel
+### 选项 1：使用 `.env` 文件（推荐）
 
-> **注意**：为获得最佳性能，我们强烈建议使用 OpenAI 模型。我们通过测试发现，其他模型在处理复杂任务和基准测试时可能会导致性能显著降低。
+1. **复制并重命名模板**：
+   ```bash
+   cd owl
+   cp .env_template .env
+   ```
+
+2. **配置你的 API 密钥**：
+   在你喜欢的文本编辑器中打开 `.env` 文件，并在相应字段中插入你的 API 密钥。
+   
+   > **注意**：对于最小示例（`run_mini.py`），你只需要配置 LLM API 密钥（例如，`OPENAI_API_KEY`）。
+
+### 选项 2：直接设置环境变量
+
+或者，你可以直接在终端中设置环境变量：
+
+- **macOS/Linux (Bash/Zsh)**：
+  ```bash
+  export OPENAI_API_KEY="你的-openai-api-密钥"
+  ```
+
+- **Windows (命令提示符)**：
+  ```batch
+  set OPENAI_API_KEY="你的-openai-api-密钥"
+  ```
+
+- **Windows (PowerShell)**：
+  ```powershell
+  $env:OPENAI_API_KEY = "你的-openai-api-密钥"
+  ```
+
+> **注意**：直接在终端中设置的环境变量仅在当前会话中有效。
 
 ## **使用Docker运行**
 
@@ -235,17 +287,32 @@ python owl/run_mini.py
 
 ## 使用不同的模型
 
-OWL 支持多种 LLM 后端。您可以使用以下脚本来运行不同的模型：
+### 模型要求
+
+- **工具调用能力**：OWL 需要具有强大工具调用能力的模型来与各种工具包交互。模型必须能够理解工具描述、生成适当的工具调用，并处理工具输出。
+
+- **多模态理解能力**：对于涉及网页交互、图像分析或视频处理的任务，需要具备多模态能力的模型来解释视觉内容和上下文。
+
+#### 支持的模型
+
+有关配置模型的信息，请参阅我们的 [CAMEL 模型文档](https://docs.camel-ai.org/key_modules/models.html#supported-model-platforms-in-camel)。
+
+> **注意**：为获得最佳性能，我们强烈推荐使用 OpenAI 模型（GPT-4 或更高版本）。我们的实验表明，其他模型在复杂任务和基准测试上可能表现明显较差，尤其是那些需要多模态理解和工具使用的任务。
+
+OWL 支持多种 LLM 后端，但功能可能因模型的工具调用和多模态能力而异。您可以使用以下脚本来运行不同的模型：
 
 ```bash
 # 使用 Qwen 模型运行
-python owl/run_qwen.py
+python owl/run_qwen_zh.py
 
 # 使用 Deepseek 模型运行
-python owl/run_deepseek.py
+python owl/run_deepseek_zh.py
 
 # 使用其他 OpenAI 兼容模型运行
 python owl/run_openai_compatiable_model.py
+
+# 使用 Ollama 运行
+python owl/run_ollama.py
 ```
 
 你可以通过修改 `run.py` 脚本来运行自己的任务：
@@ -280,12 +347,77 @@ OWL 将自动调用与文档相关的工具来处理文件并提取答案。
 - "帮我调试这段 Python 代码：[在此粘贴你的代码]"
 - "总结这篇研究论文的主要观点：[论文URL]"
 
+# 🧰 工具包与功能
+
+> **重要提示**：有效使用工具包需要具备强大工具调用能力的模型。对于多模态工具包（Web、图像、视频），模型还必须具备多模态理解能力。
+
+OWL支持多种工具包，可通过修改脚本中的`tools`列表进行自定义：
+
+```python
+# 配置工具包
+tools = [
+    *WebToolkit(headless=False).get_tools(),  # 浏览器自动化
+    *VideoAnalysisToolkit(model=models["video"]).get_tools(),
+    *AudioAnalysisToolkit().get_tools(),  # 需要OpenAI API密钥
+    *CodeExecutionToolkit(sandbox="subprocess").get_tools(),
+    *ImageAnalysisToolkit(model=models["image"]).get_tools(),
+    SearchToolkit().search_duckduckgo,
+    SearchToolkit().search_google,  # 如果不可用请注释
+    SearchToolkit().search_wiki,
+    *ExcelToolkit().get_tools(),
+    *DocumentProcessingToolkit(model=models["document"]).get_tools(),
+    *FileWriteToolkit(output_dir="./").get_tools(),
+]
+```
+
+## 主要工具包
+
+关键工具包包括：
+
+### 多模态工具包（需要模型具备多模态能力）
+- **WebToolkit**：浏览器自动化，用于网页交互和导航
+- **VideoAnalysisToolkit**：视频处理和内容分析
+- **ImageAnalysisToolkit**：图像分析和解释
+
+### 基于文本的工具包
+- **AudioAnalysisToolkit**：音频处理（需要 OpenAI API）
+- **CodeExecutionToolkit**：Python 代码执行和评估
+- **SearchToolkit**：网络搜索（Google、DuckDuckGo、维基百科）
+- **DocumentProcessingToolkit**：文档解析（PDF、DOCX等）
+
+其他专用工具包：ArxivToolkit、GitHubToolkit、GoogleMapsToolkit、MathToolkit、NetworkXToolkit、NotionToolkit、RedditToolkit、WeatherToolkit等。完整工具包列表请参阅[CAMEL工具包文档](https://docs.camel-ai.org/key_modules/tools.html#built-in-toolkits)。
+
+## 自定义配置
+
+自定义可用工具的方法：
+
+```python
+# 1. 导入工具包
+from camel.toolkits import WebToolkit, SearchToolkit, CodeExecutionToolkit
+
+# 2. 配置工具列表
+tools = [
+    *WebToolkit(headless=True).get_tools(),
+    SearchToolkit().search_wiki,
+    *CodeExecutionToolkit(sandbox="subprocess").get_tools(),
+]
+
+# 3. 传递给助手代理
+assistant_agent_kwargs = {"model": models["assistant"], "tools": tools}
+```
+
+选择必要的工具包可优化性能并减少资源使用。
+
 # 🌐 网页界面
 
 OWL 现在包含一个基于网页的用户界面，使与系统交互变得更加容易。要启动网页界面，请运行：
 
 ```bash
-python run_app.py
+# 中文版本
+python run_app_zh.py
+
+# 英文版本
+python run_app_en.py
 ```
 
 网页界面提供以下功能：
@@ -314,10 +446,12 @@ python run_gaia_roleplaying.py
 
 # ⏱️ 未来计划
 
-- [ ] 撰写一篇技术博客，详细介绍我们在现实任务中多智能体协作方面的探索与见解。
-- [ ] 通过引入更多针对特定领域任务的专业工具，进一步完善工具生态系统。
-- [ ] 开发更复杂的智能体交互模式和通信协议
+我们正在不断努力改进 OWL。以下是我们的路线图：
 
+- [ ] 撰写技术博客，详细介绍我们在现实任务中多智能体协作方面的探索与见解
+- [ ] 通过引入更多针对特定领域任务的专业工具，进一步完善工具生态系统
+- [ ] 开发更复杂的智能体交互模式和通信协议
+- [ ] 提高复杂多步推理任务的性能
 
 # 📄 许可证
 
@@ -338,10 +472,27 @@ python run_gaia_roleplaying.py
 }
 ```
 
+# 🤝 贡献
+
+我们欢迎社区的贡献！以下是您可以提供帮助的方式：
+
+1. 阅读我们的[贡献指南](https://github.com/camel-ai/camel/blob/master/CONTRIBUTING.md)
+2. 查看[开放的问题](https://github.com/camel-ai/camel/issues)或创建新的问题
+3. 提交包含您改进的拉取请求
+
+**当前开放贡献的问题：**
+- [#1812](https://github.com/camel-ai/camel/issues/1812)
+- [#1802](https://github.com/camel-ai/camel/issues/1802)
+- [#1798](https://github.com/camel-ai/camel/issues/1798)
+- [#1770](https://github.com/camel-ai/camel/issues/1770)
+
+要认领一个问题，只需在该问题下留言表明您的兴趣即可。
+
 # 🔥 社区
+加入我们的 ([*Discord*](https://discord.camel-ai.org/) 或 [*微信*](https://ghli.org/camel/wechat.png)) 社区，一起探索智能体扩展规律的边界。
+
 加入我们，参与更多讨论！
-<!-- ![](./assets/community.png) -->
-![](./assets/community_7.jpg)
+![](./assets/community.jpg)
 <!-- ![](./assets/meetup.jpg) -->
 
 # ❓ 常见问题
@@ -349,6 +500,30 @@ python run_gaia_roleplaying.py
 **Q: 为什么启动示例脚本后，我没有看到本地运行Chrome浏览器？**
 
 A: 当OWL判断某个任务可以使用非浏览器工具（如搜索、代码分析等）完成时，浏览器就不会启动。只有在判断需要使用浏览器工具的时候，本地才会弹出浏览器窗口，并进行浏览器模拟交互。
+
+**Q: 我应该使用哪个Python版本？**
+
+A: OWL支持Python 3.10、3.11和3.12。为了与所有依赖项获得最佳兼容性，我们推荐使用Python 3.10。
+
+**Q: 我如何为项目做贡献？**
+
+A: 请参阅我们的[贡献](#-贡献)部分，了解如何参与的详细信息。我们欢迎各种形式的贡献，从代码改进到文档更新。
+
+# 📚 探索 CAMEL 依赖
+
+OWL 是基于 [CAMEL](https://github.com/camel-ai/camel) 框架构建的，以下是如何探索 CAMEL 源代码并了解其与 OWL 的工作方式：
+
+## 访问 CAMEL 源代码
+
+```bash
+# 克隆 CAMEL 仓库
+git clone https://github.com/camel-ai/camel.git
+cd camel
+```
+
+# ⭐ Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=camel-ai/owl&type=Date)](https://star-history.com/#camel-ai/owl&Date)
 
 [docs-image]: https://img.shields.io/badge/Documentation-EB3ECC
 [docs-url]: https://camel-ai.github.io/camel/index.html

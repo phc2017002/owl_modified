@@ -24,129 +24,129 @@ import json
 import signal
 import dotenv
 
-# 设置日志队列
+# Set up log queue
 log_queue: queue.Queue[str] = queue.Queue()
 
-# 当前运行的进程
+# Currently running process
 current_process = None
 process_lock = threading.Lock()
 
-# 脚本选项
+# Script options
 SCRIPTS = {
-    "Qwen Mini (中文)": "run_qwen_mini_zh.py",
-    "Qwen （中文）": "run_qwen_zh.py",
+    "Qwen Mini (Chinese)": "run_qwen_mini_zh.py",
+    "Qwen (Chinese)": "run_qwen_zh.py",
     "Mini": "run_mini.py",
-    "DeepSeek （中文）": "run_deepseek_zh.py",
+    "DeepSeek (Chinese)": "run_deepseek_zh.py",
     "Default": "run.py",
     "GAIA Roleplaying": "run_gaia_roleplaying.py",
     "OpenAI Compatible": "run_openai_compatiable_model.py",
     "Ollama": "run_ollama.py",
 }
 
-# 脚本描述
+# Script descriptions
 SCRIPT_DESCRIPTIONS = {
-    "Qwen Mini (中文)": "使用阿里云Qwen模型的中文版本，适合中文问答和任务",
-    "Qwen （中文）": "使用阿里云Qwen模型，支持多种工具和功能",
-    "Mini": "轻量级版本，使用OpenAI GPT-4o模型",
-    "DeepSeek （中文）": "使用DeepSeek模型，适合非多模态任务",
-    "Default": "默认OWL实现，使用OpenAI GPT-4o模型和全套工具",
-    "GAIA Roleplaying": "GAIA基准测试实现，用于评估模型能力",
-    "OpenAI Compatible": "使用兼容OpenAI API的第三方模型，支持自定义API端点",
-    "Ollama": "使用Ollama API",
+    "Qwen Mini (Chinese)": "Uses the Chinese version of Alibaba Cloud's Qwen model, suitable for Chinese Q&A and tasks",
+    "Qwen (Chinese)": "Uses Alibaba Cloud's Qwen model, supports various tools and functions",
+    "Mini": "Lightweight version, uses OpenAI GPT-4o model",
+    "DeepSeek (Chinese)": "Uses DeepSeek model, suitable for non-multimodal tasks",
+    "Default": "Default OWL implementation, uses OpenAI GPT-4o model and full set of tools",
+    "GAIA Roleplaying": "GAIA benchmark implementation, used to evaluate model capabilities",
+    "OpenAI Compatible": "Uses third-party models compatible with OpenAI API, supports custom API endpoints",
+    "Ollama": "Uses Ollama API",
 }
 
-# 环境变量分组
+# Environment variable groups
 ENV_GROUPS = {
-    "模型API": [
+    "Model API": [
         {
             "name": "OPENAI_API_KEY",
-            "label": "OpenAI API密钥",
+            "label": "OpenAI API Key",
             "type": "password",
             "required": False,
-            "help": "OpenAI API密钥，用于访问GPT模型。获取方式：https://platform.openai.com/api-keys",
+            "help": "OpenAI API key for accessing GPT models. Get it from: https://platform.openai.com/api-keys",
         },
         {
             "name": "OPENAI_API_BASE_URL",
-            "label": "OpenAI API基础URL",
+            "label": "OpenAI API Base URL",
             "type": "text",
             "required": False,
-            "help": "OpenAI API的基础URL，可选。如果使用代理或自定义端点，请设置此项。",
+            "help": "Base URL for OpenAI API, optional. Set this if using a proxy or custom endpoint.",
         },
         {
             "name": "QWEN_API_KEY",
-            "label": "阿里云Qwen API密钥",
+            "label": "Alibaba Cloud Qwen API Key",
             "type": "password",
             "required": False,
-            "help": "阿里云Qwen API密钥，用于访问Qwen模型。获取方式：https://help.aliyun.com/zh/model-studio/developer-reference/get-api-key",
+            "help": "Alibaba Cloud Qwen API key for accessing Qwen models. Get it from: https://help.aliyun.com/zh/model-studio/developer-reference/get-api-key",
         },
         {
             "name": "DEEPSEEK_API_KEY",
-            "label": "DeepSeek API密钥",
+            "label": "DeepSeek API Key",
             "type": "password",
             "required": False,
-            "help": "DeepSeek API密钥，用于访问DeepSeek模型。获取方式：https://platform.deepseek.com/api_keys",
+            "help": "DeepSeek API key for accessing DeepSeek models. Get it from: https://platform.deepseek.com/api_keys",
         },
     ],
-    "搜索工具": [
+    "Search Tools": [
         {
             "name": "GOOGLE_API_KEY",
-            "label": "Google API密钥",
+            "label": "Google API Key",
             "type": "password",
             "required": False,
-            "help": "Google搜索API密钥，用于网络搜索功能。获取方式：https://developers.google.com/custom-search/v1/overview",
+            "help": "Google Search API key for web search functionality. Get it from: https://developers.google.com/custom-search/v1/overview",
         },
         {
             "name": "SEARCH_ENGINE_ID",
-            "label": "搜索引擎ID",
+            "label": "Search Engine ID",
             "type": "text",
             "required": False,
-            "help": "Google自定义搜索引擎ID，与Google API密钥配合使用。获取方式：https://developers.google.com/custom-search/v1/overview",
+            "help": "Google Custom Search Engine ID, used with Google API key. Get it from: https://developers.google.com/custom-search/v1/overview",
         },
     ],
-    "其他工具": [
+    "Other Tools": [
         {
             "name": "HF_TOKEN",
-            "label": "Hugging Face令牌",
+            "label": "Hugging Face Token",
             "type": "password",
             "required": False,
-            "help": "Hugging Face API令牌，用于访问Hugging Face模型和数据集。获取方式：https://huggingface.co/join",
+            "help": "Hugging Face API token for accessing Hugging Face models and datasets. Get it from: https://huggingface.co/join",
         },
         {
             "name": "CHUNKR_API_KEY",
-            "label": "Chunkr API密钥",
+            "label": "Chunkr API Key",
             "type": "password",
             "required": False,
-            "help": "Chunkr API密钥，用于文档处理功能。获取方式：https://chunkr.ai/",
+            "help": "Chunkr API key for document processing functionality. Get it from: https://chunkr.ai/",
         },
         {
             "name": "FIRECRAWL_API_KEY",
-            "label": "Firecrawl API密钥",
+            "label": "Firecrawl API Key",
             "type": "password",
             "required": False,
-            "help": "Firecrawl API密钥，用于网页爬取功能。获取方式：https://www.firecrawl.dev/",
+            "help": "Firecrawl API key for web crawling functionality. Get it from: https://www.firecrawl.dev/",
         },
     ],
-    "自定义环境变量": [],  # 用户自定义的环境变量将存储在这里
+    "Custom Environment Variables": [],  # User-defined environment variables will be stored here
 }
 
 
 def get_script_info(script_name):
-    """获取脚本的详细信息"""
-    return SCRIPT_DESCRIPTIONS.get(script_name, "无描述信息")
+    """Get detailed information about the script"""
+    return SCRIPT_DESCRIPTIONS.get(script_name, "No description available")
 
 
 def load_env_vars():
-    """加载环境变量"""
+    """Load environment variables"""
     env_vars = {}
-    # 尝试从.env文件加载
+    # Try to load from .env file
     dotenv.load_dotenv()
 
-    # 获取所有环境变量
+    # Get all environment variables
     for group in ENV_GROUPS.values():
         for var in group:
             env_vars[var["name"]] = os.environ.get(var["name"], "")
 
-    # 加载.env文件中可能存在的其他环境变量
+    # Load other environment variables that may exist in the .env file
     if Path(".env").exists():
         with open(".env", "r", encoding="utf-8") as f:
             for line in f:
@@ -156,22 +156,22 @@ def load_env_vars():
                     key = key.strip()
                     value = value.strip().strip("\"'")
 
-                    # 检查是否是已知的环境变量
+                    # Check if it's a known environment variable
                     known_var = False
                     for group in ENV_GROUPS.values():
                         if any(var["name"] == key for var in group):
                             known_var = True
                             break
 
-                    # 如果不是已知的环境变量，添加到自定义环境变量组
+                    # If it's not a known environment variable, add it to the custom environment variables group
                     if not known_var and key not in env_vars:
-                        ENV_GROUPS["自定义环境变量"].append(
+                        ENV_GROUPS["Custom Environment Variables"].append(
                             {
                                 "name": key,
                                 "label": key,
                                 "type": "text",
                                 "required": False,
-                                "help": "用户自定义环境变量",
+                                "help": "User-defined environment variable",
                             }
                         )
                         env_vars[key] = value
@@ -180,8 +180,8 @@ def load_env_vars():
 
 
 def save_env_vars(env_vars):
-    """保存环境变量到.env文件"""
-    # 读取现有的.env文件内容
+    """Save environment variables to .env file"""
+    # Read existing .env file content
     env_path = Path(".env")
     existing_content = {}
 
@@ -193,102 +193,106 @@ def save_env_vars(env_vars):
                     key, value = line.split("=", 1)
                     existing_content[key.strip()] = value.strip()
 
-    # 更新环境变量
+    # Update environment variables
     for key, value in env_vars.items():
-        if value:  # 只保存非空值
-            # 确保值是字符串形式，并用引号包裹
-            value = str(value)  # 确保值是字符串
+        if value:  # Only save non-empty values
+            # Ensure the value is a string and wrapped in quotes
+            value = str(value)  # Ensure the value is a string
 
-            # 先移除现有的引号（如果有）
+            # First remove existing quotes (if any)
             stripped_value = value.strip("\"'")
 
-            # 用双引号包裹值，确保特殊字符被正确处理
+            # Wrap the value in double quotes to ensure special characters are handled correctly
             quoted_value = f'"{stripped_value}"'
             existing_content[key] = quoted_value
 
-            # 同时更新当前进程的环境变量（使用未引用的值）
+            # Also update the environment variable for the current process (using the unquoted value)
             os.environ[key] = stripped_value
 
-    # 写入.env文件
+    # Write to .env file
     with open(env_path, "w", encoding="utf-8") as f:
         for key, value in existing_content.items():
             f.write(f"{key}={value}\n")
 
-    return "✅ 环境变量已保存"
+    return "✅ Environment variables saved"
 
 
 def add_custom_env_var(name, value, var_type):
-    """添加自定义环境变量"""
+    """Add custom environment variable"""
     if not name:
-        return "❌ 环境变量名不能为空", None
+        return "❌ Environment variable name cannot be empty", None
 
-    # 检查是否已存在同名环境变量
+    # Check if an environment variable with the same name already exists
     for group in ENV_GROUPS.values():
         if any(var["name"] == name for var in group):
-            return f"❌ 环境变量 {name} 已存在", None
+            return f"❌ Environment variable {name} already exists", None
 
-    # 添加到自定义环境变量组
+    # Add to custom environment variables group
     ENV_GROUPS["自定义环境变量"].append(
         {
             "name": name,
             "label": name,
             "type": var_type,
             "required": False,
-            "help": "用户自定义环境变量",
+            "help": "User-defined environment variable",
         }
     )
 
-    # 保存环境变量
+    # Save environment variables
     env_vars = {name: value}
     save_env_vars(env_vars)
 
-    # 返回成功消息和更新后的环境变量组
-    return f"✅ 已添加环境变量 {name}", ENV_GROUPS["自定义环境变量"]
+    # Return success message and updated environment variable group
+    return f"✅ Added environment variable {name}", ENV_GROUPS[
+        "Custom Environment Variables"
+    ]
 
 
 def update_custom_env_var(name, value, var_type):
-    """更改自定义环境变量"""
+    """Update custom environment variable"""
     if not name:
-        return "❌ 环境变量名不能为空", None
+        return "❌ Environment variable name cannot be empty", None
 
-    # 检查环境变量是否存在于自定义环境变量组中
+    # Check if the environment variable exists in the custom environment variables group
     found = False
-    for i, var in enumerate(ENV_GROUPS["自定义环境变量"]):
+    for i, var in enumerate(ENV_GROUPS["Custom Environment Variables"]):
         if var["name"] == name:
-            # 更新类型
-            ENV_GROUPS["自定义环境变量"][i]["type"] = var_type
+            # Update type
+            ENV_GROUPS["Custom Environment Variables"][i]["type"] = var_type
             found = True
             break
 
     if not found:
-        return f"❌ 自定义环境变量 {name} 不存在", None
+        return f"❌ Custom environment variable {name} does not exist", None
 
-    # 保存环境变量值
+    # Save environment variable value
     env_vars = {name: value}
     save_env_vars(env_vars)
 
-    # 返回成功消息和更新后的环境变量组
-    return f"✅ 已更新环境变量 {name}", ENV_GROUPS["自定义环境变量"]
+    # Return success message and updated environment variable group
+    return f"✅ Updated environment variable {name}", ENV_GROUPS[
+        "Custom Environment Variables"
+    ]
 
 
 def delete_custom_env_var(name):
-    """删除自定义环境变量"""
+    """Delete custom environment variable"""
     if not name:
-        return "❌ 环境变量名不能为空", None
+        return "❌ Environment variable name cannot be empty", None
 
-    # 检查环境变量是否存在于自定义环境变量组中
+    # Check if the environment variable exists in the custom environment variables group
     found = False
-    for i, var in enumerate(ENV_GROUPS["自定义环境变量"]):
+    for i, var in enumerate(ENV_GROUPS["Custom Environment Variables"]):
         if var["name"] == name:
-            # 从自定义环境变量组中删除
-            del ENV_GROUPS["自定义环境变量"][i]
+            # Delete from custom environment variables group
+            del ENV_GROUPS["Custom Environment Variables"][i]
             found = True
             break
 
     if not found:
-        return f"❌ 自定义环境变量 {name} 不存在", None
+        return f"❌ Custom environment variable {name} does not exist", None
 
-    # 从.env文件中删除该环境变量
+    # Delete the environment variable from .env file
     env_path = Path(".env")
     if env_path.exists():
         with open(env_path, "r", encoding="utf-8") as f:
@@ -296,107 +300,109 @@ def delete_custom_env_var(name):
 
         with open(env_path, "w", encoding="utf-8") as f:
             for line in lines:
-                # 更精确地匹配环境变量行
-                # 检查是否为非注释行且包含变量名=
+                # More precisely match environment variable lines
+                # Check if it's a non-comment line and contains variable_name=
                 line_stripped = line.strip()
                 if line_stripped.startswith("#") or "=" not in line_stripped:
-                    f.write(line)  # 保留注释行和不包含=的行
+                    f.write(line)  # Keep comment lines and lines without =
                     continue
 
-                # 提取变量名并检查是否与要删除的变量匹配
+                # Extract variable name and check if it matches the variable to be deleted
                 var_name = line_stripped.split("=", 1)[0].strip()
                 if var_name != name:
-                    f.write(line)  # 保留不匹配的变量
+                    f.write(line)  # Keep variables that don't match
 
-    # 从当前进程的环境变量中删除
+    # Delete from current process environment variables
     if name in os.environ:
         del os.environ[name]
 
-    # 返回成功消息和更新后的环境变量组
-    return f"✅ 已删除环境变量 {name}", ENV_GROUPS["自定义环境变量"]
+    # Return success message and updated environment variable group
+    return f"✅ Deleted environment variable {name}", ENV_GROUPS[
+        "Custom Environment Variables"
+    ]
 
 
 def terminate_process():
-    """终止当前运行的进程"""
+    """Terminate the currently running process"""
     global current_process
 
     with process_lock:
         if current_process is not None and current_process.poll() is None:
             try:
-                # 在Windows上使用taskkill强制终止进程树
+                # On Windows, use taskkill to forcibly terminate the process tree
                 if os.name == "nt":
-                    # 获取进程ID
+                    # Get process ID
                     pid = current_process.pid
-                    # 使用taskkill命令终止进程及其子进程 - 避免使用shell=True以提高安全性
+                    # Use taskkill command to terminate the process and its children - avoid using shell=True for better security
                     try:
                         subprocess.run(
                             ["taskkill", "/F", "/T", "/PID", str(pid)], check=False
                         )
                     except subprocess.SubprocessError as e:
-                        log_queue.put(f"终止进程时出错: {str(e)}\n")
-                        return f"❌ 终止进程时出错: {str(e)}"
+                        log_queue.put(f"Error terminating process: {str(e)}\n")
+                        return f"❌ Error terminating process: {str(e)}"
                 else:
-                    # 在Unix上使用SIGTERM和SIGKILL
+                    # On Unix, use SIGTERM and SIGKILL
                     current_process.terminate()
                     try:
                         current_process.wait(timeout=3)
                     except subprocess.TimeoutExpired:
                         current_process.kill()
 
-                # 等待进程终止
+                # Wait for process to terminate
                 try:
                     current_process.wait(timeout=2)
                 except subprocess.TimeoutExpired:
-                    pass  # 已经尝试强制终止，忽略超时
+                    pass  # Already tried to force terminate, ignore timeout
 
-                log_queue.put("进程已终止\n")
-                return "✅ 进程已终止"
+                log_queue.put("Process terminated\n")
+                return "✅ Process terminated"
             except Exception as e:
-                log_queue.put(f"终止进程时出错: {str(e)}\n")
-                return f"❌ 终止进程时出错: {str(e)}"
+                log_queue.put(f"Error terminating process: {str(e)}\n")
+                return f"❌ Error terminating process: {str(e)}"
         else:
-            return "❌ 没有正在运行的进程"
+            return "❌ No process is currently running"
 
 
 def run_script(script_dropdown, question, progress=gr.Progress()):
-    """运行选定的脚本并返回输出"""
+    """Run the selected script and return the output"""
     global current_process
 
     script_name = SCRIPTS.get(script_dropdown)
     if not script_name:
-        return "❌ 无效的脚本选择", "", "", "", None
+        return "❌ Invalid script selection", "", "", "", None
 
     if not question.strip():
-        return "请输入问题！", "", "", "", None
+        return "Please enter a question!", "", "", "", None
 
-    # 清空日志队列
+    # Clear the log queue
     while not log_queue.empty():
         log_queue.get()
 
-    # 创建日志目录
+    # Create log directory
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
 
-    # 创建带时间戳的日志文件
+    # Create log file with timestamp
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     log_file = log_dir / f"{script_name.replace('.py', '')}_{timestamp}.log"
 
-    # 构建命令
+    # Build command
     cmd = [
         sys.executable,
         os.path.join("owl", "script_adapter.py"),
         os.path.join("owl", script_name),
     ]
 
-    # 创建环境变量副本并添加问题
+    # Create a copy of environment variables and add the question
     env = os.environ.copy()
-    # 确保问题是字符串类型
+    # Ensure question is a string type
     if not isinstance(question, str):
         question = str(question)
-    # 保留换行符，但确保是有效的字符串
+    # Preserve newlines, but ensure it's a valid string
     env["OWL_QUESTION"] = question
 
-    # 启动进程
+    # Start the process
     with process_lock:
         current_process = subprocess.Popen(
             cmd,
@@ -408,44 +414,44 @@ def run_script(script_dropdown, question, progress=gr.Progress()):
             encoding="utf-8",
         )
 
-    # 创建线程来读取输出
+    # Create thread to read output
     def read_output():
         try:
-            # 使用唯一的时间戳确保日志文件名不重复
+            # Use a unique timestamp to ensure log filename is not duplicated
             timestamp_unique = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
             unique_log_file = (
                 log_dir / f"{script_name.replace('.py', '')}_{timestamp_unique}.log"
             )
 
-            # 使用这个唯一的文件名写入日志
+            # Use this unique filename to write logs
             with open(unique_log_file, "w", encoding="utf-8") as f:
-                # 更新全局日志文件路径
+                # Update global log file path
                 nonlocal log_file
                 log_file = unique_log_file
 
                 for line in iter(current_process.stdout.readline, ""):
                     if line:
-                        # 写入日志文件
+                        # Write to log file
                         f.write(line)
                         f.flush()
-                        # 添加到队列
+                        # Add to queue
                         log_queue.put(line)
         except Exception as e:
-            log_queue.put(f"读取输出时出错: {str(e)}\n")
+            log_queue.put(f"Error reading output: {str(e)}\n")
 
-    # 启动读取线程
+    # Start the reading thread
     threading.Thread(target=read_output, daemon=True).start()
 
-    # 收集日志
+    # Collect logs
     logs = []
-    progress(0, desc="正在运行...")
+    progress(0, desc="Running...")
 
-    # 等待进程完成或超时
+    # Wait for process to complete or timeout
     start_time = time.time()
-    timeout = 1800  # 30分钟超时
+    timeout = 1800  # 30 minutes timeout
 
     while current_process.poll() is None:
-        # 检查是否超时
+        # Check if timeout
         if time.time() - start_time > timeout:
             with process_lock:
                 if current_process.poll() is None:
@@ -453,22 +459,22 @@ def run_script(script_dropdown, question, progress=gr.Progress()):
                         current_process.send_signal(signal.CTRL_BREAK_EVENT)
                     else:
                         current_process.terminate()
-                    log_queue.put("执行超时，已终止进程\n")
+                    log_queue.put("Execution timeout, process terminated\n")
             break
 
-        # 从队列获取日志
+        # Get logs from queue
         while not log_queue.empty():
             log = log_queue.get()
             logs.append(log)
 
-        # 更新进度
+        # Update progress
         elapsed = time.time() - start_time
-        progress(min(elapsed / 300, 0.99), desc="正在运行...")
+        progress(min(elapsed / 300, 0.99), desc="Running...")
 
-        # 短暂休眠以减少CPU使用
+        # Short sleep to reduce CPU usage
         time.sleep(0.1)
 
-        # 每秒更新一次日志显示
+        # Update log display once per second
         yield (
             status_message(current_process),
             extract_answer(logs),
@@ -477,14 +483,14 @@ def run_script(script_dropdown, question, progress=gr.Progress()):
             None,
         )
 
-    # 获取剩余日志
+    # Get remaining logs
     while not log_queue.empty():
         logs.append(log_queue.get())
 
-    # 提取聊天历史（如果有）
+    # Extract chat history (if any)
     chat_history = extract_chat_history(logs)
 
-    # 返回最终状态和日志
+    # Return final status and logs
     return (
         status_message(current_process),
         extract_answer(logs),
@@ -495,17 +501,17 @@ def run_script(script_dropdown, question, progress=gr.Progress()):
 
 
 def status_message(process):
-    """根据进程状态返回状态消息"""
+    """Return status message based on process status"""
     if process.poll() is None:
-        return "⏳ 正在运行..."
+        return "⏳ Running..."
     elif process.returncode == 0:
-        return "✅ 执行成功"
+        return "✅ Execution successful"
     else:
-        return f"❌ 执行失败 (返回码: {process.returncode})"
+        return f"❌ Execution failed (return code: {process.returncode})"
 
 
 def extract_answer(logs):
-    """从日志中提取答案"""
+    """Extract answer from logs"""
     answer = ""
     for log in logs:
         if "Answer:" in log:
@@ -515,42 +521,44 @@ def extract_answer(logs):
 
 
 def extract_chat_history(logs):
-    """尝试从日志中提取聊天历史"""
+    """Try to extract chat history from logs"""
     try:
         chat_json_str = ""
         capture_json = False
 
         for log in logs:
             if "chat_history" in log:
-                # 开始捕获JSON
+                # Start capturing JSON
                 start_idx = log.find("[")
                 if start_idx != -1:
                     capture_json = True
                     chat_json_str = log[start_idx:]
             elif capture_json:
-                # 继续捕获JSON直到找到匹配的结束括号
+                # Continue capturing JSON until finding the matching closing bracket
                 chat_json_str += log
                 if "]" in log:
-                    # 找到结束括号，尝试解析JSON
+                    # Found closing bracket, try to parse JSON
                     end_idx = chat_json_str.rfind("]") + 1
                     if end_idx > 0:
                         try:
-                            # 清理可能的额外文本
+                            # Clean up possible extra text
                             json_str = chat_json_str[:end_idx].strip()
                             chat_data = json.loads(json_str)
 
-                            # 格式化为Gradio聊天组件可用的格式
+                            # Format for use with Gradio chat component
                             formatted_chat = []
                             for msg in chat_data:
                                 if "role" in msg and "content" in msg:
-                                    role = "用户" if msg["role"] == "user" else "助手"
+                                    role = (
+                                        "User" if msg["role"] == "user" else "Assistant"
+                                    )
                                     formatted_chat.append([role, msg["content"]])
                             return formatted_chat
                         except json.JSONDecodeError:
-                            # 如果解析失败，继续捕获
+                            # If parsing fails, continue capturing
                             pass
                         except Exception:
-                            # 其他错误，停止捕获
+                            # Other errors, stop capturing
                             capture_json = False
     except Exception:
         pass
@@ -558,36 +566,36 @@ def extract_chat_history(logs):
 
 
 def create_ui():
-    """创建Gradio界面"""
-    # 加载环境变量
+    """Create Gradio interface"""
+    # Load environment variables
     env_vars = load_env_vars()
 
     with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as app:
         gr.Markdown(
             """
-            # 🦉 OWL 智能助手运行平台
+            # 🦉 OWL Intelligent Assistant Platform
             
-            选择一个模型并输入您的问题，系统将运行相应的脚本并显示结果。
+            Select a model and enter your question, the system will run the corresponding script and display the results.
             """
         )
 
         with gr.Tabs():
-            with gr.TabItem("运行模式"):
+            with gr.TabItem("Run Mode"):
                 with gr.Row():
                     with gr.Column(scale=1):
-                        # 确保默认值是SCRIPTS中存在的键
+                        # Ensure default value is a key that exists in SCRIPTS
                         default_script = list(SCRIPTS.keys())[0] if SCRIPTS else None
                         script_dropdown = gr.Dropdown(
                             choices=list(SCRIPTS.keys()),
                             value=default_script,
-                            label="选择模式",
+                            label="Select Mode",
                         )
 
                         script_info = gr.Textbox(
                             value=get_script_info(default_script)
                             if default_script
                             else "",
-                            label="模型描述",
+                            label="Model Description",
                             interactive=False,
                         )
 
@@ -599,45 +607,45 @@ def create_ui():
 
                         question_input = gr.Textbox(
                             lines=8,
-                            placeholder="请输入您的问题...",
-                            label="问题",
+                            placeholder="Please enter your question...",
+                            label="Question",
                             elem_id="question_input",
                             show_copy_button=True,
                         )
 
                         gr.Markdown(
                             """
-                            > **注意**: 您输入的问题将替换脚本中的默认问题。系统会自动处理问题的替换，确保您的问题被正确使用。
-                            > 支持多行输入，换行将被保留。
+                            > **Note**: Your question will replace the default question in the script. The system will automatically handle the replacement, ensuring your question is used correctly.
+                            > Multi-line input is supported, line breaks will be preserved.
                             """
                         )
 
                         with gr.Row():
-                            run_button = gr.Button("运行", variant="primary")
-                            stop_button = gr.Button("终止", variant="stop")
+                            run_button = gr.Button("Run", variant="primary")
+                            stop_button = gr.Button("Stop", variant="stop")
 
                     with gr.Column(scale=2):
                         with gr.Tabs():
-                            with gr.TabItem("结果"):
-                                status_output = gr.Textbox(label="状态")
-                                answer_output = gr.Textbox(label="回答", lines=10)
-                                log_file_output = gr.Textbox(label="日志文件路径")
+                            with gr.TabItem("Results"):
+                                status_output = gr.Textbox(label="Status")
+                                answer_output = gr.Textbox(label="Answer", lines=10)
+                                log_file_output = gr.Textbox(label="Log File Path")
 
-                            with gr.TabItem("运行日志"):
-                                log_output = gr.Textbox(label="完整日志", lines=25)
+                            with gr.TabItem("Run Logs"):
+                                log_output = gr.Textbox(label="Complete Logs", lines=25)
 
-                            with gr.TabItem("聊天历史"):
-                                chat_output = gr.Chatbot(label="对话历史")
+                            with gr.TabItem("Chat History"):
+                                chat_output = gr.Chatbot(label="Conversation History")
 
-                # 示例问题
+                # Example questions
                 examples = [
                     [
-                        "Qwen Mini (中文)",
-                        "浏览亚马逊并找出一款对程序员有吸引力的产品。请提供产品名称和价格",
+                        "Qwen Mini (Chinese)",
+                        "Browse Amazon and find a product that is attractive to programmers. Please provide the product name and price.",
                     ],
                     [
-                        "DeepSeek （中文）",
-                        "请分析GitHub上CAMEL-AI项目的最新统计数据。找出该项目的星标数量、贡献者数量和最近的活跃度。然后，创建一个简单的Excel表格来展示这些数据，并生成一个柱状图来可视化这些指标。最后，总结CAMEL项目的受欢迎程度和发展趋势。",
+                        "DeepSeek (Chinese)",
+                        "Please analyze the latest statistics of the CAMEL-AI project on GitHub. Find out the number of stars, number of contributors, and recent activity of the project. Then, create a simple Excel spreadsheet to display this data and generate a bar chart to visualize these metrics. Finally, summarize the popularity and development trends of the CAMEL project.",
                     ],
                     [
                         "Default",
@@ -647,62 +655,74 @@ def create_ui():
 
                 gr.Examples(examples=examples, inputs=[script_dropdown, question_input])
 
-            with gr.TabItem("环境变量配置"):
+            with gr.TabItem("Environment Variable Configuration"):
                 env_inputs = {}
-                save_status = gr.Textbox(label="保存状态", interactive=False)
+                save_status = gr.Textbox(label="Save Status", interactive=False)
 
-                # 添加自定义环境变量部分
-                with gr.Accordion("添加自定义环境变量", open=True):
+                # Add custom environment variables section
+                with gr.Accordion("Add Custom Environment Variables", open=True):
                     with gr.Row():
                         new_var_name = gr.Textbox(
-                            label="环境变量名", placeholder="例如：MY_CUSTOM_API_KEY"
+                            label="Environment Variable Name",
+                            placeholder="Example: MY_CUSTOM_API_KEY",
                         )
                         new_var_value = gr.Textbox(
-                            label="环境变量值", placeholder="输入值"
+                            label="Environment Variable Value",
+                            placeholder="Enter value",
                         )
                         new_var_type = gr.Dropdown(
-                            choices=["text", "password"], value="text", label="类型"
+                            choices=["text", "password"], value="text", label="Type"
                         )
 
-                    add_var_button = gr.Button("添加环境变量", variant="primary")
-                    add_var_status = gr.Textbox(label="添加状态", interactive=False)
+                    add_var_button = gr.Button(
+                        "Add Environment Variable", variant="primary"
+                    )
+                    add_var_status = gr.Textbox(label="Add Status", interactive=False)
 
-                    # 自定义环境变量列表
+                    # Custom environment variables list
                     custom_vars_list = gr.JSON(
-                        value=ENV_GROUPS["自定义环境变量"],
-                        label="已添加的自定义环境变量",
-                        visible=len(ENV_GROUPS["自定义环境变量"]) > 0,
+                        value=ENV_GROUPS["Custom Environment Variables"],
+                        label="Added Custom Environment Variables",
+                        visible=len(ENV_GROUPS["Custom Environment Variables"]) > 0,
                     )
 
-                # 更改和删除自定义环境变量部分
+                # Update and delete custom environment variables section
                 with gr.Accordion(
-                    "更改或删除自定义环境变量",
+                    "Update or Delete Custom Environment Variables",
                     open=True,
-                    visible=len(ENV_GROUPS["自定义环境变量"]) > 0,
+                    visible=len(ENV_GROUPS["Custom Environment Variables"]) > 0,
                 ) as update_delete_accordion:
                     with gr.Row():
-                        # 创建下拉菜单，显示所有自定义环境变量
+                        # Create dropdown menu to display all custom environment variables
                         custom_var_dropdown = gr.Dropdown(
                             choices=[
-                                var["name"] for var in ENV_GROUPS["自定义环境变量"]
+                                var["name"]
+                                for var in ENV_GROUPS["Custom Environment Variables"]
                             ],
-                            label="选择环境变量",
+                            label="Select Environment Variable",
                             interactive=True,
                         )
                         update_var_value = gr.Textbox(
-                            label="新的环境变量值", placeholder="输入新值"
+                            label="New Environment Variable Value",
+                            placeholder="Enter new value",
                         )
                         update_var_type = gr.Dropdown(
-                            choices=["text", "password"], value="text", label="类型"
+                            choices=["text", "password"], value="text", label="Type"
                         )
 
                     with gr.Row():
-                        update_var_button = gr.Button("更新环境变量", variant="primary")
-                        delete_var_button = gr.Button("删除环境变量", variant="stop")
+                        update_var_button = gr.Button(
+                            "Update Environment Variable", variant="primary"
+                        )
+                        delete_var_button = gr.Button(
+                            "Delete Environment Variable", variant="stop"
+                        )
 
-                    update_var_status = gr.Textbox(label="操作状态", interactive=False)
+                    update_var_status = gr.Textbox(
+                        label="Operation Status", interactive=False
+                    )
 
-                # 添加环境变量按钮点击事件
+                # Add environment variable button click event
                 add_var_button.click(
                     fn=add_custom_env_var,
                     inputs=[new_var_name, new_var_value, new_var_type],
@@ -713,14 +733,14 @@ def create_ui():
                     outputs=[update_delete_accordion],
                 )
 
-                # 更新环境变量按钮点击事件
+                # Update environment variable button click event
                 update_var_button.click(
                     fn=update_custom_env_var,
                     inputs=[custom_var_dropdown, update_var_value, update_var_type],
                     outputs=[update_var_status, custom_vars_list],
                 )
 
-                # 删除环境变量按钮点击事件
+                # Delete environment variable button click event
                 delete_var_button.click(
                     fn=delete_custom_env_var,
                     inputs=[custom_var_dropdown],
@@ -731,7 +751,7 @@ def create_ui():
                     outputs=[update_delete_accordion],
                 )
 
-                # 当自定义环境变量列表更新时，更新下拉菜单选项
+                # When custom environment variables list is updated, update dropdown menu options
                 custom_vars_list.change(
                     fn=lambda vars: {
                         "choices": [var["name"] for var in vars],
@@ -741,35 +761,36 @@ def create_ui():
                     outputs=[custom_var_dropdown],
                 )
 
-                # 现有环境变量配置
+                # Existing environment variable configuration
                 for group_name, vars in ENV_GROUPS.items():
                     if (
-                        group_name != "自定义环境变量" or len(vars) > 0
-                    ):  # 只显示非空的自定义环境变量组
+                        group_name != "Custom Environment Variables" or len(vars) > 0
+                    ):  # Only show non-empty custom environment variable groups
                         with gr.Accordion(
-                            group_name, open=(group_name != "自定义环境变量")
+                            group_name,
+                            open=(group_name != "Custom Environment Variables"),
                         ):
                             for var in vars:
-                                # 添加帮助信息
+                                # Add help information
                                 gr.Markdown(f"**{var['help']}**")
 
                                 if var["type"] == "password":
                                     env_inputs[var["name"]] = gr.Textbox(
                                         value=env_vars.get(var["name"], ""),
                                         label=var["label"],
-                                        placeholder=f"请输入{var['label']}",
+                                        placeholder=f"Please enter {var['label']}",
                                         type="password",
                                     )
                                 else:
                                     env_inputs[var["name"]] = gr.Textbox(
                                         value=env_vars.get(var["name"], ""),
                                         label=var["label"],
-                                        placeholder=f"请输入{var['label']}",
+                                        placeholder=f"Please enter {var['label']}",
                                     )
 
-                save_button = gr.Button("保存环境变量", variant="primary")
+                save_button = gr.Button("Save Environment Variables", variant="primary")
 
-                # 保存环境变量
+                # Save environment variables
                 save_inputs = [
                     env_inputs[var_name]
                     for group in ENV_GROUPS.values()
@@ -795,7 +816,7 @@ def create_ui():
                     outputs=save_status,
                 )
 
-        # 运行脚本
+        # Run script
         run_button.click(
             fn=run_script,
             inputs=[script_dropdown, question_input],
@@ -809,29 +830,29 @@ def create_ui():
             show_progress=True,
         )
 
-        # 终止运行
+        # Terminate execution
         stop_button.click(fn=terminate_process, inputs=[], outputs=[status_output])
 
-        # 添加页脚
+        # Add footer
         gr.Markdown(
             """
-            ### 📝 使用说明
+            ### 📝 Instructions
             
-            - 选择一个模型并输入您的问题
-            - 点击"运行"按钮开始执行
-            - 如需终止运行，点击"终止"按钮
-            - 在"结果"标签页查看执行状态和回答
-            - 在"运行日志"标签页查看完整日志
-            - 在"聊天历史"标签页查看对话历史（如果有）
-            - 在"环境变量配置"标签页配置API密钥和其他环境变量
-            - 您可以添加自定义环境变量，满足特殊需求
+            - Select a model and enter your question
+            - Click the "Run" button to start execution
+            - To stop execution, click the "Stop" button
+            - View execution status and answers in the "Results" tab
+            - View complete logs in the "Run Logs" tab
+            - View conversation history in the "Chat History" tab (if available)
+            - Configure API keys and other environment variables in the "Environment Variable Configuration" tab
+            - You can add custom environment variables to meet special requirements
             
-            ### ⚠️ 注意事项
+            ### ⚠️ Notes
             
-            - 运行某些模型可能需要API密钥，请确保在"环境变量配置"标签页中设置了相应的环境变量
-            - 某些脚本可能需要较长时间运行，请耐心等待
-            - 如果运行超过30分钟，进程将自动终止
-            - 您输入的问题将替换脚本中的默认问题，确保问题与所选模型兼容
+            - Running some models may require API keys, please make sure you have set the corresponding environment variables in the "Environment Variable Configuration" tab
+            - Some scripts may take a long time to run, please be patient
+            - If execution exceeds 30 minutes, the process will automatically terminate
+            - Your question will replace the default question in the script, ensure the question is compatible with the selected model
             """
         )
 
@@ -839,6 +860,6 @@ def create_ui():
 
 
 if __name__ == "__main__":
-    # 创建并启动应用
+    # Create and launch the application
     app = create_ui()
     app.queue().launch(share=True)

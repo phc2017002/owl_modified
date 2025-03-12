@@ -26,6 +26,7 @@ from camel.toolkits import (
     CodeExecutionToolkit,
     ExcelToolkit,
     SearchToolkit,
+    FileWriteToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
 
@@ -95,6 +96,7 @@ def construct_society(question: str) -> OwlRolePlaying:
         SearchToolkit().search_wiki,
         *ExcelToolkit().get_tools(),
         *DocumentProcessingToolkit(model=models["document"]).get_tools(),
+        *FileWriteToolkit(output_dir="./").get_tools(),
     ]
 
     # Configure agent roles and parameters
